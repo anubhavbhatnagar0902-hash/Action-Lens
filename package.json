@@ -1,0 +1,12 @@
+{
+  "name": "actionlens",
+  "version": "1.0.0",
+  "description": "Turn meeting notes into action items, decisions, follow-ups and risks, ready for Jira and Slack.",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test tests/extractor.test.js",
+    "build": "node scripts/build-single-file.js",
+    "start": "npx --yes serve@14.2.4 . -l 5173"
+  },
+  "engines": { "node": ">=18" }
+}

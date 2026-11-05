@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>ActionLens</title><meta name="description" content="Turn meeting notes into action items, owners, due dates, decisions and risks.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="#" id="brandLink" aria-label="ActionLens — back to the welcome screen">
+      <svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><rect width="24" height="24" rx="7" fill="var(--accent)"/><path d="M6.5 12.5l3.5 3.5 7.5-8" fill="none" stroke="var(--on-accent)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>ActionLens</span>
+    </a>
+    <nav class="crumbs" aria-label="Current meeting">
+      <span id="crumbTitle" class="crumb-current">New meeting</span>
+    </nav>
+    <div class="topbar-actions">
+      <button id="newBtn" type="button" class="btn btn-quiet hide-sm" title="Start a new meeting">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        New meeting
+      </button>
+      <button id="helpBtn" type="button" class="btn btn-quiet" title="Help and user guide">
+        <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="8" cy="8" r="6.3" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6.3 6.2a1.8 1.8 0 113 1.4c-.7.5-1.3.8-1.3 1.7" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="11.4" r=".8" fill="currentColor"/></svg>
+        <span class="hide-sm">Help</span>
+      </button>
+      <button id="settingsBtn" type="button" class="engine-pill" title="Choose how notes are read">
+        <span class="dot" id="engineDot"></span><span id="engineLabel">Standard mode</span>
+        <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="M4 6l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <button id="shareBtn" type="button" class="btn btn-primary" disabled title="Extract actions first">
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 10V2.5M5 5.5l3-3 3 3M3 9.5v3a1 1 0 001 1h8a1 1 0 001-1v-3" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Share
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="stepbar" id="stepbar">
+  <div class="stepbar-inner">
+    <ol class="steps" aria-label="Progress">
+      <li id="st1"><button type="button" data-step="1"><span class="st-num">1</span><span class="st-label">Add notes</span></button></li>
+      <li class="st-line" aria-hidden="true"></li>
+      <li id="st2"><button type="button" data-step="2"><span class="st-num">2</span><span class="st-label">Review results</span></button></li>
+      <li class="st-line" aria-hidden="true"></li>
+      <li id="st3"><button type="button" data-step="3"><span class="st-num">3</span><span class="st-label">Share</span></button></li>
+    </ol>
+    <p class="step-hint" id="stepHint" aria-live="polite"></p>
+  </div>
+</div>
+
+<!-- Welcome screen: shown on the first visit and from the logo -->
+<section id="welcome" class="welcome" hidden>
+  <div class="welcome-inner">
+    <div class="welcome-hero">
+      <div class="welcome-copy">
+        <h1>Turn meeting notes into a clear action list</h1>
+        <p class="lead">Paste your notes and ActionLens finds <b>who needs to do what, by when</b>. It also picks out decisions, open questions and risks, and gets them ready to share in Slack, Jira or email.</p>
+        <div class="welcome-cta">
+          <button id="startExample" type="button" class="btn btn-primary btn-lg">Try it with example notes</button>
+          <button id="startOwn" type="button" class="btn btn-lg">Use my own notes</button>
+        </div>
+        <button id="startTour" type="button" class="text-link">
+          <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><circle cx="8" cy="8" r="6.3" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6.6 5.4l4 2.6-4 2.6z" fill="currentColor"/></svg>
+          First time here? Take the 1-minute guided tour
+        </button>
+      </div>
+      <div class="welcome-preview" aria-hidden="true">
+        <div class="pv-note">
+          <span class="pv-label">Your notes</span>
+          <p>Ravi to submit the Zoom app by Friday (urgent)</p>
+        </div>
+        <div class="pv-arrow"><svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 4v16M6 14l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="pv-card">
+          <span class="pv-label">Action item</span>
+          <p class="pv-task">Submit the Zoom app</p>
+          <div class="pv-chips">
+            <span class="pv-chip"><span class="avatar sm h1">RK</span>Ravi Kumar</span>
+            <span class="pv-chip">Fri, 11 Dec</span>
+            <span class="pv-chip pv-high">High</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ol class="how">
+      <li>
+        <span class="how-ico c1"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 3.5h8l4 4V20a.5.5 0 01-.5.5h-11A.5.5 0 016 20V3.5zM14 3.5V8h4M9 12h6M9 15.5h6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg></span>
+        <div><b>1. Add your notes</b><p>Paste them, type them or open a .txt or .md file. Rough notes are fine.</p></div>
+      </li>
+      <li>
+        <span class="how-ico c2"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="11" cy="11" r="6" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M15.5 15.5L20 20M8.5 11l1.8 1.8 3.2-3.6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><b>2. Review the results</b><p>Check owners and due dates. Anything missing is flagged so nothing slips.</p></div>
+      </li>
+      <li>
+        <span class="how-ico c3"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 14V4M8 8l4-4 4 4M5 13v6a1 1 0 001 1h12a1 1 0 001-1v-6" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <div><b>3. Share with your team</b><p>Copy ready-made minutes, a Slack message or a Jira import file.</p></div>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<main class="workspace" id="workspace">
+  <section class="pane notes-pane" id="notesPane" aria-labelledby="notesHeading">
+    <div class="pane-head">
+      <div class="pane-title">
+        <h2 id="notesHeading">Meeting notes</h2>
+        <div class="seg" role="tablist" aria-label="Notes view">
+          <button id="modeEdit" type="button" role="tab" aria-selected="true">Write</button>
+          <button id="modeSource" type="button" role="tab" aria-selected="false" disabled title="Available after you extract actions">Highlighted</button>
+        </div>
+      </div>
+      <div class="pane-tools">
+        <select id="sample" class="select-quiet" aria-label="Load example notes"></select>
+        <label class="btn btn-quiet file-btn" title="Open a .txt or .md file">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M9 1.5H4a1 1 0 00-1 1v11a1 1 0 001 1h8a1 1 0 001-1V5.5L9 1.5zM9 1.5v4h4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+          <span>Open file</span>
+          <input id="file" type="file" accept=".txt,.md,.markdown,text/plain">
+        </label>
+        <button id="clear" type="button" class="btn btn-quiet">Clear</button>
+      </div>
+    </div>
+
+    <div class="notes-meta">
+      <label class="date-field" for="meetingDate">
+        <span>Meeting date</span>
+        <input id="meetingDate" type="date">
+      </label>
+      <span id="notesCount" class="muted"></span>
+    </div>
+
+    <details class="tips" id="tips">
+      <summary>
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 1.8a4.2 4.2 0 00-2.4 7.6c.4.3.6.7.6 1.2v.6h3.6v-.6c0-.5.2-.9.6-1.2A4.2 4.2 0 008 1.8zM6.3 13.5h3.4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        How to write notes so nothing is missed
+      </summary>
+      <table class="tips-table">
+        <tr><td><code>Priya to send the deck by Friday</code></td><td>Action for Priya, due Friday</td></tr>
+        <tr><td><code>@Ravi fix the login bug</code> · <code>Sana: share designs</code></td><td>Action for Ravi · for Sana</td></tr>
+        <tr><td><code>Decision: go with vendor A</code></td><td>Decision</td></tr>
+        <tr><td><code>Blocker: staging is down</code></td><td>Risk or blocker</td></tr>
+        <tr><td><code>Follow up on budget</code> · a line ending in <code>?</code></td><td>Follow-up or open question</td></tr>
+        <tr><td><code>urgent</code> · <code>ASAP</code> · <code>P0</code></td><td>High priority</td></tr>
+        <tr><td><code>Attendees: Priya Sharma, Ravi Kumar</code></td><td>Matches first names to full names</td></tr>
+        <tr><td><code>Date: 2026-12-04</code></td><td>Sets the meeting date, so “Friday” becomes a real date</td></tr>
+      </table>
+    </details>
+
+    <div class="notes-body">
+      <textarea id="notes" spellcheck="false" aria-label="Meeting notes" placeholder="Paste or type your meeting notes here, for example:
+
+Date: 2026-12-04
+Attendees: Priya Sharma, Ravi Kumar
+- Ravi to submit the Zoom app by Friday (urgent)
+- Decision: launch with Google Meet first
+- Blocker: staging database is almost full"></textarea>
+      <div id="sourcePanel" class="source-panel" hidden>
+        <div class="legend" aria-label="Colour key">
+          <span><i class="lg action"></i>Action</span><span><i class="lg decision"></i>Decision</span><span><i class="lg followup"></i>Follow-up</span><span><i class="lg risk"></i>Risk</span>
+          <span class="legend-hint">Click a highlighted line to open its item</span>
+        </div>
+        <div id="sourceView" class="source-view" aria-label="Notes with highlighted items"></div>
+      </div>
+    </div>
+
+    <div class="pane-foot">
+      <button id="run" type="button" class="btn btn-primary btn-lg">
+        <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M8 1.5l1.5 3.8 3.8 1.5-3.8 1.5L8 12.1 6.5 8.3 2.7 6.8l3.8-1.5z" fill="currentColor"/></svg>
+        Extract actions
+      </button>
+      <span class="kbd-hint">or press <kbd>Ctrl</kbd>+<kbd>Enter</kbd></span>
+      <span id="staleNote" class="stale" hidden>
+        <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true"><path d="M8 2l6.5 11.5h-13z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M8 6.5v3.2M8 11.6v.1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Notes changed. Extract again to update.
+      </span>
+    </div>
+    <p id="runError" class="run-error" role="alert" hidden></p>
+  </section>
+
+  <section class="pane results-pane" id="resultsPane" aria-live="polite">
+    <div id="emptyState" class="empty">
+      <div class="empty-art" aria-hidden="true">
+        <svg viewBox="0 0 64 64" width="56" height="56"><rect x="12" y="8" width="40" height="48" rx="6" fill="var(--accent-soft)" stroke="var(--accent)" stroke-width="2"/><path d="M21 24l3 3 6-6M21 36l3 3 6-6" fill="none" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><path d="M35 25h9M35 37h9" stroke="var(--accent)" stroke-width="2.4" stroke-linecap="round"/></svg>
+      </div>
+      <h2>Your action list will appear here</h2>
+      <p>Add your notes on the left and choose <b>Extract actions</b>. Not sure what to write? Load the example to see how it works.</p>
+      <button id="emptyExample" type="button" class="btn">Load example notes</button>
+    </div>
+
+    <div id="results" hidden>
+      <div class="meeting-head">
+        <h1 id="resultTitle"></h1>
+        <div class="meeting-meta">
+          <span id="resultDate"></span>
+          <span class="avatars" id="attendees"></span>
+        </div>
+      </div>
+
+      <div id="attention" class="callout"></div>
+
+      <div class="stat-tabs" id="statTabs" role="tablist" aria-label="Results">
+        <button type="button" role="tab" data-tab="actions" class="st-action">
+          <span class="stat-n" id="cnt-actions">0</span><span class="stat-l">Action items</span>
+        </button>
+        <button type="button" role="tab" data-tab="decisions" class="st-decision">
+          <span class="stat-n" id="cnt-decisions">0</span><span class="stat-l">Decisions</span>
+        </button>
+        <button type="button" role="tab" data-tab="followups" class="st-followup">
+          <span class="stat-n" id="cnt-followups">0</span><span class="stat-l">Follow-ups</span>
+        </button>
+        <button type="button" role="tab" data-tab="risks" class="st-risk">
+          <span class="stat-n" id="cnt-risks">0</span><span class="stat-l">Risks</span>
+        </button>
+      </div>
+
+      <div class="tab-panel" id="panel-actions" role="tabpanel">
+        <p class="panel-help">Tasks someone has to do. <b>Click the text, a name, a date or a priority to change it.</b> Hover a row to see its line in your notes.</p>
+        <div class="list-tools">
+          <select id="ownerFilter" class="select-box" aria-label="Show actions for"></select>
+          <label class="toggle"><input id="attnOnly" type="checkbox"><span class="track" aria-hidden="true"></span>Only show actions that need attention</label>
+          <span id="listCount" class="muted"></span>
+        </div>
+        <ul id="actionList" class="action-list"></ul>
+        <button id="addAction" type="button" class="add-row">
+          <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          Add an action
+        </button>
+        <div class="workload">
+          <h3>Who has what</h3>
+          <div id="load"></div>
+        </div>
+      </div>
+      <div class="tab-panel" id="panel-decisions" role="tabpanel" hidden>
+        <p class="panel-help">What the group agreed or chose during the meeting.</p>
+        <ul class="item-list" id="decisions"></ul>
+      </div>
+      <div class="tab-panel" id="panel-followups" role="tabpanel" hidden>
+        <p class="panel-help">Open questions and topics to come back to.</p>
+        <ul class="item-list" id="followups"></ul>
+      </div>
+      <div class="tab-panel" id="panel-risks" role="tabpanel" hidden>
+        <p class="panel-help">Anything that could delay the work or put it at risk, including blockers.</p>
+        <ul class="item-list" id="risks"></ul>
+      </div>
+
+      <div class="next-step">
+        <div>
+          <b>Done reviewing?</b>
+          <span>Share the results with your team as minutes, a Slack message or a Jira import.</span>
+        </div>
+        <button id="shareBtn2" type="button" class="btn btn-primary">Share results</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="appfoot">
+  <span>ActionLens 1.0</span>
+  <button type="button" class="text-link small" id="footHelp">User guide</button>
+  <span>In Standard mode your notes never leave this browser.</span>
+</footer>
+
+<datalist id="ownerList"></datalist>
+
+<dialog id="shareDialog" class="sheet" aria-labelledby="shareTitle">
+  <div class="sheet-head">
+    <div>
+      <h2 id="shareTitle">Share results</h2>
+      <p class="muted">Pick a format, choose <b>Copy</b>, then paste it where your team works.</p>
+    </div>
+    <button type="button" class="icon-btn" data-close aria-label="Close">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="fmt-grid" role="tablist" aria-label="Format">
+    <button type="button" role="tab" data-fmt="markdown"><b>Meeting minutes</b><span>Email, Confluence, Notion</span></button>
+    <button type="button" role="tab" data-fmt="slack"><b>Slack message</b><span>Post in a channel</span></button>
+    <button type="button" role="tab" data-fmt="csv"><b>Jira import</b><span>CSV file for bulk import</span></button>
+    <button type="button" role="tab" data-fmt="json"><b>JSON</b><span>For developers</span></button>
+  </div>
+  <p class="fmt-hint" id="exportHint"></p>
+  <div id="shareWarn" class="callout warn slim" hidden></div>
+  <pre id="exportOut" class="preview" tabindex="0" aria-label="Preview"></pre>
+  <div class="sheet-foot">
+    <button id="download" type="button" class="btn">Download file</button>
+    <button id="copy" type="button" class="btn btn-primary">Copy</button>
+  </div>
+</dialog>
+
+<dialog id="settingsDialog" class="sheet sheet-narrow" aria-labelledby="settingsTitle">
+  <div class="sheet-head">
+    <div>
+      <h2 id="settingsTitle">How should notes be read?</h2>
+      <p class="muted">You can change this at any time.</p>
+    </div>
+    <button type="button" class="icon-btn" data-close aria-label="Close">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="choice-list" role="radiogroup" aria-label="Mode">
+    <label class="choice">
+      <input type="radio" name="engine" value="rules" checked>
+      <span class="choice-body">
+        <b>Standard mode <em class="badge">Recommended</em></b>
+        <span>Instant, private and works offline. Notes never leave your browser. Works best when each task names an owner.</span>
+      </span>
+    </label>
+    <label class="choice">
+      <input type="radio" name="engine" value="ai">
+      <span class="choice-body">
+        <b>AI mode</b>
+        <span>Understands free-form, conversational notes. Needs an Anthropic API key, and your notes are sent to the Anthropic API.</span>
+      </span>
+    </label>
+  </div>
+  <div id="aiSettings" class="ai-fields" hidden>
+    <label for="apiKey">Anthropic API key</label>
+    <input id="apiKey" type="password" autocomplete="off" placeholder="sk-ant-…">
+    <p class="muted">Kept only in this browser tab and never saved. Get a key from your Anthropic console.</p>
+    <details class="advanced">
+      <summary>Advanced</summary>
+      <label for="model">Model name</label>
+      <input id="model" type="text" value="" placeholder="Leave blank to use the default">
+    </details>
+  </div>
+  <div class="sheet-foot">
+    <button type="button" class="btn" data-close>Cancel</button>
+    <button type="button" class="btn btn-primary" id="saveSettings">Save</button>
+  </div>
+</dialog>
+
+<dialog id="helpDialog" class="sheet" aria-labelledby="helpTitle">
+  <div class="sheet-head">
+    <div>
+      <h2 id="helpTitle">User guide</h2>
+      <p class="muted">Everything you need to get from notes to a shared action list.</p>
+    </div>
+    <button type="button" class="icon-btn" data-close aria-label="Close">
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="help-body">
+    <div class="help-actions">
+      <button type="button" class="btn btn-primary" id="helpTour">Start the guided tour</button>
+      <button type="button" class="btn" id="helpWelcome">Show the welcome screen</button>
+    </div>
+
+    <h3>Quick start</h3>
+    <ol>
+      <li><b>Add notes.</b> Paste or type them in <b>Meeting notes</b>, choose <b>Load example…</b>, or use <b>Open file</b> for a .txt or .md file.</li>
+      <li><b>Extract actions.</b> Choose <b>Extract actions</b> or press Ctrl+Enter.</li>
+      <li><b>Review.</b> Fix anything the yellow banner flags: actions without an owner or a due date.</li>
+      <li><b>Share.</b> Choose <b>Share</b>, pick a format, then <b>Copy</b>.</li>
+    </ol>
+
+    <h3>What you see after extracting</h3>
+    <ul>
+      <li><b>Summary cards</b> show how many action items, decisions, follow-ups and risks were found. Click a card to see that list.</li>
+      <li><b>Highlighted notes</b> (left) colour every line that produced an item: blue for actions, green for decisions, amber for follow-ups and red for risks. Click a coloured line to open its item; click <b>Line n</b> on an item to jump back to the note.</li>
+      <li><b>Who has what</b> shows how many actions each person owns.</li>
+    </ul>
+
+    <h3>Editing an action</h3>
+    <ul>
+      <li><b>Task:</b> click the text and type.</li>
+      <li><b>Owner:</b> click the name chip and pick or type a name. A dashed yellow chip means no owner yet.</li>
+      <li><b>Due date:</b> click the date chip to open a calendar. The quoted word, such as “Friday”, shows what the notes said.</li>
+      <li><b>Priority:</b> click High, Medium or Low to change it.</li>
+      <li><b>Remove:</b> use the bin icon on the right of the row. You can undo it straight away.</li>
+      <li><b>Add:</b> choose <b>Add an action</b> under the list.</li>
+    </ul>
+
+    <h3>Writing notes that work well</h3>
+    <p>Put the owner's name before the task (“Priya to…”, “@Ravi…”, “Sana: …”), add a date word (“by Friday”, “EOD”, “11 Dec”), and include a <code>Date:</code> line and an <code>Attendees:</code> line at the top. Open <b>How to write notes so nothing is missed</b> above the notes box for more examples.</p>
+
+    <h3>Keyboard shortcuts</h3>
+    <table class="kbd-table">
+      <tr><td><kbd>Ctrl</kbd>+<kbd>Enter</kbd></td><td>Extract actions</td></tr>
+      <tr><td><kbd>Esc</kbd></td><td>Close a window or the tour</td></tr>
+      <tr><td><kbd>Tab</kbd></td><td>Move between fields</td></tr>
+    </table>
+
+    <h3>Privacy</h3>
+    <p>In <b>Standard mode</b> everything happens in your browser and your notes are never sent anywhere. Your current notes are kept in this browser so a refresh doesn't lose them; <b>Clear</b> removes them. <b>AI mode</b> sends notes to the Anthropic API using your own key.</p>
+  </div>
+</dialog>
+
+<div id="tour" class="tour" hidden>
+  <div class="tour-spot" id="tourSpot"></div>
+  <div class="tour-card" id="tourCard" role="dialog" aria-modal="true" aria-labelledby="tourTitle">
+    <div class="tour-top"><span id="tourStep" class="tour-step"></span><button type="button" id="tourSkip" class="text-link small">Skip tour</button></div>
+    <h3 id="tourTitle"></h3>
+    <p id="tourText"></p>
+    <div class="tour-dots" id="tourDots" aria-hidden="true"></div>
+    <div class="tour-actions">
+      <button type="button" id="tourBack" class="btn">Back</button>
+      <button type="button" id="tourNext" class="btn btn-primary">Next</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" role="status" hidden><span id="toastMsg"></span><button id="toastAction" type="button" hidden></button></div>
+<script src="src/samples.js"></script>
+<script src="src/extractor.js"></script>
+<script src="src/app.js"></script>
+</body>
+</html>
